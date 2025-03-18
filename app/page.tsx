@@ -42,13 +42,15 @@ export default function Home() {
 
   const getGrokReply = (query: string) => {
     const queryLower = query.toLowerCase();
-    const emotionalKeywords = ["worried", "stressed", "anxious", "overwhelmed", "anxous"];
+    const emotionalKeywords = ["worried", "stressed", "anxious", "overwhelmed", "anxous", "strong emotions"];
     const isEmotionalQuery = emotionalKeywords.some((keyword) =>
       queryLower.includes(keyword) || calculateSimilarity(queryLower, keyword) > 0.6
     );
 
     if (isEmotionalQuery && queryLower.includes("recommend")) {
       return "I sense you might be feeling stressed or worried. Based on the book's wisdom, I recommend trying Meditation and Breathwork to ground yourself.";
+    } else if (isEmotionalQuery && queryLower.includes("help")) {
+      return "I notice you’re experiencing strong emotions. Based on the book's wisdom, I suggest trying Self-Reflection and Shadow Work to understand your feelings, and Compassionate Reflection to approach them with kindness.";
     } else if (queryLower.includes("resonance")) {
       return "Resonance is the feeling of alignment between your inner and outer self, creating harmony in your life.";
     } else if (queryLower.includes("awareness")) {
@@ -92,7 +94,7 @@ export default function Home() {
   const alignResponse = (query: string, grokResponse: string) => {
     let alignedReply = grokResponse;
     const queryLower = query.toLowerCase();
-    const isEmotionalQuery = ["worried", "stressed", "anxious", "overwhelmed", "anxous"].some((keyword) =>
+    const isEmotionalQuery = ["worried", "stressed", "anxious", "overwhelmed", "anxous", "strong emotions"].some((keyword) =>
       queryLower.includes(keyword) || calculateSimilarity(queryLower, keyword) > 0.6
     );
 
