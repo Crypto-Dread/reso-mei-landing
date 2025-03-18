@@ -5,7 +5,7 @@ import { useState } from "react";
 export default function Home() {
   const [userQuery, setUserQuery] = useState("");
   const [response, setResponse] = useState("");
-  const [displayedQuery, setDisplayedQuery] = useState(""); // New state to hold the submitted query
+  const [displayedQuery, setDisplayedQuery] = useState(""); // Holds the submitted query
 
   const resonanceNodes = [
     "Life as a Journey of Resonance: Aligning inner and outer reactions for harmony.",
@@ -48,7 +48,7 @@ export default function Home() {
     );
 
     if (isEmotionalQuery && queryLower.includes("recommend")) {
-      return "I sense you might be feeling stressed or worried. Based on your book's wisdom, I recommend trying Meditation and Breathwork to ground yourself.";
+      return "I sense you might be feeling stressed or worried. Based on the book's wisdom, I recommend trying Meditation and Breathwork to ground yourself.";
     } else if (queryLower.includes("resonance")) {
       return "Resonance is the feeling of alignment between your inner and outer self, creating harmony in your life.";
     } else if (queryLower.includes("awareness")) {
@@ -112,7 +112,7 @@ export default function Home() {
       }
     }
     if (alignedReply === grokResponse) {
-      alignedReply = `This aligns with your journey of Resonance. ${grokResponse} Consider exploring your 18 nodes for deeper insight.`;
+      alignedReply = `${grokResponse} Consider exploring the 18 nodes for deeper insight.`; // Removed "This aligns with your journey of Resonance."
     }
     return alignedReply;
   };
