@@ -73,6 +73,8 @@ export default function Home() {
       return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
     } else if (isEmotionalQuery && queryLower.includes("help")) {
       return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
+    } else if (isEmotionalQuery && (queryLower.includes("sleep") || queryLower.includes("cant sleep"))) {
+      return "I see you’re having trouble sleeping, which may be linked to stress or restlessness. Based on the book's wisdom, I recommend Meditation and Breathwork to promote relaxation and calmness. Additionally, the closest practice for you might be exploring ";
     } else if (isEmotionalQuery) { // Standalone emotional statements
       return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
     } else if (queryLower.includes("journey") && (queryLower.includes("my unique") || queryLower.includes("acceptance"))) {
@@ -143,7 +145,8 @@ export default function Home() {
     } else if (isEmotionalQuery && (queryLower.includes("suggest") || queryLower.includes("recommend") || queryLower.includes("help"))) {
       const queries = query.split(/[\n…]/).map(q => q.trim()).filter(q => q);
       let combinedReply = alignedReply;
-      queries.forEach((q) => {
+      let sleepMentioned = false;
+      queries.forEach((q, index) => {
         const qLower = q.toLowerCase();
         const lastFourNodes = resonanceNodes.slice(14);
         let maxSimilarity = -1;
@@ -154,12 +157,19 @@ export default function Home() {
           if (learningData[qLower]?.[nodeTitle]) {
             similarity += learningData[qLower][nodeTitle] * 0.1; // Boost by learned frequency
           }
+          // Prioritize Node 16 for sleep
+          if (qLower.includes("sleep") || qLower.includes("cant sleep")) {
+            sleepMentioned = true;
+            if (nodeTitle.includes("meditation") || nodeTitle.includes("breathwork")) {
+              similarity = 1.0; // Force Node 16 as the top match for sleep
+            }
+          }
           if (similarity > maxSimilarity) {
             maxSimilarity = similarity;
             closestNode = node;
           }
         });
-        if (combinedReply === grokResponse) {
+        if (combinedReply === grokResponse && index === 0) {
           combinedReply += closestNode ? `${closestNode.split(":")[0]} for further support.` : "one of the practices for further support.";
           combinedReply += " and deeper insight.";
           setLearningData((prev) => {
@@ -175,16 +185,24 @@ export default function Home() {
           });
         }
       });
+      // Ensure Node 16 is suggested if sleep is mentioned
+      if (sleepMentioned && !combinedReply.includes("Meditation and Breathwork")) {
+        combinedReply = combinedReply.replace(/for further support\./, "Meditation and Breathwork for further support.");
+      }
       alignedReply = combinedReply;
     } else if (isEmotionalQuery) {
       const lastFourNodes = resonanceNodes.slice(14);
       let maxSimilarity = -1;
       let closestNode = "";
+      let sleepMentioned = queryLower.includes("sleep") || queryLower.includes("cant sleep");
       lastFourNodes.forEach((node) => {
         const nodeTitle = node.split(":")[0].toLowerCase();
         let similarity = calculateSimilarity(queryLower, nodeTitle);
         if (learningData[queryLower]?.[nodeTitle]) {
           similarity += learningData[queryLower][nodeTitle] * 0.1;
+        }
+        if (sleepMentioned && (nodeTitle.includes("meditation") || nodeTitle.includes("breathwork"))) {
+          similarity = 1.0; // Force Node 16 for sleep
         }
         if (similarity > maxSimilarity) {
           maxSimilarity = similarity;
