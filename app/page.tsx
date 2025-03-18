@@ -47,8 +47,8 @@ export default function Home() {
       queryLower.includes(keyword) || calculateSimilarity(queryLower, keyword) > 0.6
     );
 
-    if (isEmotionalQuery && queryLower.includes("recommend")) {
-      return "I sense you might be feeling stressed or worried. Based on the book's wisdom, I recommend trying Meditation and Breathwork to ground yourself.";
+    if (isEmotionalQuery && (queryLower.includes("recommend") || queryLower.includes("suggest"))) {
+      return "I notice you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. Additionally, the closest practice for you might be exploring ";
     } else if (isEmotionalQuery && queryLower.includes("help")) {
       return "I notice you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. Additionally, the closest practice for you might be exploring ";
     } else if (queryLower.includes("resonance")) {
@@ -98,7 +98,7 @@ export default function Home() {
       queryLower.includes(keyword) || calculateSimilarity(queryLower, keyword) > 0.6
     );
 
-    if (isEmotionalQuery && queryLower.includes("help") && !queryLower.includes("recommend")) {
+    if (isEmotionalQuery && (queryLower.includes("suggest") || queryLower.includes("recommend") || queryLower.includes("help"))) {
       // Find the closest node among Nodes 15-18
       const lastFourNodes = resonanceNodes.slice(14); // Nodes 15-18
       let maxSimilarity = -1;
