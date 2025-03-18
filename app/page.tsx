@@ -5,6 +5,7 @@ import { useState } from "react";
 export default function Home() {
   const [userQuery, setUserQuery] = useState("");
   const [response, setResponse] = useState("");
+  const [displayedQuery, setDisplayedQuery] = useState(""); // New state to hold the submitted query
 
   const resonanceNodes = [
     "Life as a Journey of Resonance: Aligning inner and outer reactions for harmony.",
@@ -31,23 +32,23 @@ export default function Home() {
     const longer = str1.length > str2.length ? str1 : str2;
     const shorter = str1.length > str2.length ? str2 : str1;
     const lengthDiff = longer.length - shorter.length;
-    if (lengthDiff > 3) return 0; // Allow up to 3 character differences
+    if (lengthDiff > 4) return 0; // Allow up to 4 character differences
     let matches = 0;
     for (let i = 0; i < shorter.length; i++) {
-      if (longer[i] === shorter[i] || (Math.abs(longer.charCodeAt(i) - shorter.charCodeAt(i)) <= 1)) matches++; // Allow near-matches
+      if (longer[i] === shorter[i] || (Math.abs(longer.charCodeAt(i) - shorter.charCodeAt(i)) <= 2)) matches++; // Allow more near-matches
     }
     return matches / longer.length;
   };
 
   const getGrokReply = (query: string) => {
     const queryLower = query.toLowerCase();
-    const emotionalKeywords = ["worried", "stressed", "anxious", "overwhelmed", "anxous"]; // Added "anxous" as a variant
+    const emotionalKeywords = ["worried", "stressed", "anxious", "overwhelmed", "anxous"];
     const isEmotionalQuery = emotionalKeywords.some((keyword) =>
-      queryLower.includes(keyword) || calculateSimilarity(queryLower, keyword) > 0.7
+      queryLower.includes(keyword) || calculateSimilarity(queryLower, keyword) > 0.6
     );
 
     if (isEmotionalQuery && queryLower.includes("recommend")) {
-      return "I sense you might be feeling stressed or worried. Based on your book's wisdom, I recommend trying Meditation and Breathwork to ground yourself, and Compassionate Reflection to approach your feelings with kindness.";
+      return "I sense you might be feeling stressed or worried. Based on your book's wisdom, I recommend trying Meditation and Breathwork to ground yourself.";
     } else if (queryLower.includes("resonance")) {
       return "Resonance is the feeling of alignment between your inner and outer self, creating harmony in your life.";
     } else if (queryLower.includes("awareness")) {
@@ -91,21 +92,26 @@ export default function Home() {
   const alignResponse = (query: string, grokResponse: string) => {
     let alignedReply = grokResponse;
     const queryLower = query.toLowerCase();
-    const relevantNodes = [];
+    const isEmotionalQuery = ["worried", "stressed", "anxious", "overwhelmed", "anxous"].some((keyword) =>
+      queryLower.includes(keyword) || calculateSimilarity(queryLower, keyword) > 0.6
+    );
 
-    resonanceNodes.forEach((node) => {
-      const nodeTitle = node.split(":")[0].toLowerCase();
-      if (
-        grokResponse.toLowerCase().includes(nodeTitle) ||
-        calculateSimilarity(grokResponse.toLowerCase(), nodeTitle) > 0.7
-      ) {
-        relevantNodes.push(node);
+    if (!isEmotionalQuery) {
+      const relevantNodes = [];
+      resonanceNodes.forEach((node) => {
+        const nodeTitle = node.split(":")[0].toLowerCase();
+        if (
+          grokResponse.toLowerCase().includes(nodeTitle) ||
+          calculateSimilarity(grokResponse.toLowerCase(), nodeTitle) > 0.7
+        ) {
+          relevantNodes.push(node);
+        }
+      });
+      if (relevantNodes.length > 0) {
+        alignedReply = `Based on our concept of Resonance (${relevantNodes.join(", ")}), ${grokResponse}`;
       }
-    });
-
-    if (relevantNodes.length > 0) {
-      alignedReply = `Based on my insight and your book's wisdom (${relevantNodes.join(", ")}), ${grokResponse}`;
-    } else if (alignedReply === grokResponse) {
+    }
+    if (alignedReply === grokResponse) {
       alignedReply = `This aligns with your journey of Resonance. ${grokResponse} Consider exploring your 18 nodes for deeper insight.`;
     }
     return alignedReply;
@@ -115,12 +121,13 @@ export default function Home() {
     const grokReply = getGrokReply(userQuery);
     const finalReply = alignResponse(userQuery, grokReply);
     setResponse(finalReply);
-    setUserQuery("");
+    setDisplayedQuery(userQuery); // Store the submitted query
   };
 
   const askAgain = () => {
     setResponse("");
-    setUserQuery("");
+    setDisplayedQuery("");
+    setUserQuery(""); // Clear only when asking again
   };
 
   return (
@@ -129,8 +136,11 @@ export default function Home() {
         <h3 className="text-xl font-semibold mb-4 text-center">Ask About Resonance</h3>
         <input
           type="text"
-          value={userQuery}
-          onChange={(e) => setUserQuery(e.target.value)}
+          value={displayedQuery || userQuery} // Show submitted query until new input
+          onChange={(e) => {
+            setUserQuery(e.target.value); // Update userQuery only on change
+            if (e.target.value) setDisplayedQuery(""); // Clear displayed query when typing
+          }}
           placeholder="Type your question..."
           className="w-full p-2 mb-4 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
         />
