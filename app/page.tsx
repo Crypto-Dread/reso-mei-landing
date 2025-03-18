@@ -31,19 +31,19 @@ export default function Home() {
     const longer = str1.length > str2.length ? str1 : str2;
     const shorter = str1.length > str2.length ? str2 : str1;
     const lengthDiff = longer.length - shorter.length;
-    if (lengthDiff > 2) return 0;
+    if (lengthDiff > 3) return 0; // Allow up to 3 character differences
     let matches = 0;
     for (let i = 0; i < shorter.length; i++) {
-      if (longer[i] === shorter[i]) matches++;
+      if (longer[i] === shorter[i] || (Math.abs(longer.charCodeAt(i) - shorter.charCodeAt(i)) <= 1)) matches++; // Allow near-matches
     }
     return matches / longer.length;
   };
 
   const getGrokReply = (query: string) => {
     const queryLower = query.toLowerCase();
-    const emotionalKeywords = ["worried", "stressed", "anxious", "overwhelmed"];
+    const emotionalKeywords = ["worried", "stressed", "anxious", "overwhelmed", "anxous"]; // Added "anxous" as a variant
     const isEmotionalQuery = emotionalKeywords.some((keyword) =>
-      queryLower.includes(keyword)
+      queryLower.includes(keyword) || calculateSimilarity(queryLower, keyword) > 0.7
     );
 
     if (isEmotionalQuery && queryLower.includes("recommend")) {
@@ -97,7 +97,7 @@ export default function Home() {
       const nodeTitle = node.split(":")[0].toLowerCase();
       if (
         grokResponse.toLowerCase().includes(nodeTitle) ||
-        calculateSimilarity(grokResponse.toLowerCase(), nodeTitle) > 0.8
+        calculateSimilarity(grokResponse.toLowerCase(), nodeTitle) > 0.7
       ) {
         relevantNodes.push(node);
       }
@@ -147,7 +147,7 @@ export default function Home() {
               onClick={askAgain}
               className="mt-2 text-blue-600 font-medium underline hover:text-blue-800"
             >
-              What else would you like to know?
+              What else can I help you with?
             </button>
           </div>
         )}
