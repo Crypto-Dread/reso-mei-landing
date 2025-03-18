@@ -56,6 +56,17 @@ export default function Home() {
       queryLower.includes(keyword) || calculateSimilarity(queryLower, keyword) > 0.6
     );
 
+    // Handle node number queries
+    const nodeMatch = queryLower.match(/what is node (\d+)|node (\d+)/);
+    if (nodeMatch) {
+      const nodeNumber = parseInt(nodeMatch[1] || nodeMatch[2], 10);
+      if (nodeNumber >= 1 && nodeNumber <= resonanceNodes.length) {
+        return `${resonanceNodes[nodeNumber - 1]} This node is part of our Resonance framework. Consider exploring `;
+      } else {
+        return `Node ${nodeNumber} is out of range. We have 18 nodes—please try a number between 1 and 18. Consider exploring `;
+      }
+    }
+
     if (isEmotionalQuery && queryLower.includes("stressed")) {
       return "I see you’re feeling stressed. Based on the book's wisdom, I recommend trying Meditation and Breathwork to ground yourself, with journaling your feelings as a supportive step. Additionally, the closest practice for you might be exploring ";
     } else if (isEmotionalQuery && (queryLower.includes("recommend") || queryLower.includes("suggest"))) {
@@ -79,7 +90,7 @@ export default function Home() {
     } else if (queryLower.includes("mindfulness")) {
       return "Mindfulness is being aware and present in the moment, often through meditation.";
     } else if (queryLower.includes("self-reflection") || queryLower.includes("shadow work")) {
-      return "Self-reflection and shadow work involve examining and integrating your hidden fears and strengths.";
+      return "Self-reflection and shadow work involve examining and integrating hidden fears and strengths.";
     } else if (queryLower.includes("acceptance") && !queryLower.includes("journey")) {
       return "Acceptance is meeting life as it is, with openness and courage.";
     } else if (queryLower.includes("resonance") && queryLower.includes("achievement")) {
@@ -111,7 +122,25 @@ export default function Home() {
       queryLower.includes(keyword) || calculateSimilarity(queryLower, keyword) > 0.6
     );
 
-    if (isEmotionalQuery && (queryLower.includes("suggest") || queryLower.includes("recommend") || queryLower.includes("help"))) {
+    const nodeMatch = queryLower.match(/what is node (\d+)|node (\d+)/);
+    if (nodeMatch) {
+      const nodeNumber = parseInt(nodeMatch[1] || nodeMatch[2], 10);
+      if (nodeNumber >= 1 && nodeNumber <= resonanceNodes.length) {
+        const nodeTitle = resonanceNodes[nodeNumber - 1].split(":")[0].toLowerCase();
+        alignedReply += `${nodeTitle} for further support. and deeper insight.`;
+        setLearningData((prev) => {
+          const newData = {
+            ...prev,
+            [queryLower]: {
+              ...prev[queryLower],
+              [nodeTitle]: (prev[queryLower]?.[nodeTitle] || 0) + 1,
+            },
+          };
+          localStorage.setItem("learningData", JSON.stringify(newData));
+          return newData;
+        });
+      }
+    } else if (isEmotionalQuery && (queryLower.includes("suggest") || queryLower.includes("recommend") || queryLower.includes("help"))) {
       const queries = query.split(/[\n…]/).map(q => q.trim()).filter(q => q);
       let combinedReply = alignedReply;
       queries.forEach((q) => {
@@ -197,7 +226,7 @@ export default function Home() {
         alignedReply = `Based on our concept of Resonance (${relevantNodes.join(", ")}), ${grokResponse}`;
       }
     }
-    if (alignedReply === grokResponse && !isEmotionalQuery) {
+    if (alignedReply === grokResponse && !isEmotionalQuery && !nodeMatch) {
       alignedReply = `${grokResponse} Consider exploring the 18 nodes for deeper insight.`;
     }
     return alignedReply;
