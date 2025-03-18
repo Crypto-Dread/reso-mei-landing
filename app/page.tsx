@@ -31,7 +31,7 @@ export default function Home() {
     const longer = str1.length > str2.length ? str1 : str2;
     const shorter = str1.length > str2.length ? str2 : str1;
     const lengthDiff = longer.length - shorter.length;
-    if (lengthDiff > 2) return 0; // Too different
+    if (lengthDiff > 2) return 0;
     let matches = 0;
     for (let i = 0; i < shorter.length; i++) {
       if (longer[i] === shorter[i]) matches++;
@@ -39,34 +39,88 @@ export default function Home() {
     return matches / longer.length;
   };
 
+  const getGrokReply = (query: string) => {
+    const queryLower = query.toLowerCase();
+    const emotionalKeywords = ["worried", "stressed", "anxious", "overwhelmed"];
+    const isEmotionalQuery = emotionalKeywords.some((keyword) =>
+      queryLower.includes(keyword)
+    );
+
+    if (isEmotionalQuery && queryLower.includes("recommend")) {
+      return "I sense you might be feeling stressed or worried. Based on your book's wisdom, I recommend trying Meditation and Breathwork to ground yourself, and Compassionate Reflection to approach your feelings with kindness.";
+    } else if (queryLower.includes("resonance")) {
+      return "Resonance is the feeling of alignment between your inner and outer self, creating harmony in your life.";
+    } else if (queryLower.includes("awareness")) {
+      return "Awareness is the ability to observe your thoughts and emotions without judgment, leading to transformation.";
+    } else if (queryLower.includes("existence")) {
+      return "Existence goes beyond the physical, connecting you to a deeper, eternal dimension.";
+    } else if (queryLower.includes("experience")) {
+      return "Experience acts as a teacher and mirror, guiding you through life’s lessons.";
+    } else if (queryLower.includes("present moment")) {
+      return "The present moment is where life truly happens, the foundation of all actions.";
+    } else if (queryLower.includes("mindfulness")) {
+      return "Mindfulness is being aware and present in the moment, often through meditation.";
+    } else if (queryLower.includes("self-reflection") || queryLower.includes("shadow work")) {
+      return "Self-reflection and shadow work involve examining and integrating your hidden fears and strengths.";
+    } else if (queryLower.includes("acceptance") && queryLower.includes("journey")) {
+      return "Accepting your unique journey means honoring your path without comparison.";
+    } else if (queryLower.includes("resonance") && queryLower.includes("achievement")) {
+      return "Prioritizing Resonance over achievement focuses on inner alignment rather than external success.";
+    } else if (queryLower.includes("presence")) {
+      return "Presence is fully inhabiting the moment with intention and awareness.";
+    } else if (queryLower.includes("acceptance")) {
+      return "Acceptance is meeting life as it is, with openness and courage.";
+    } else if (queryLower.includes("curiosity")) {
+      return "Curiosity drives exploration and discovery, opening new perspectives.";
+    } else if (queryLower.includes("compassion")) {
+      return "Compassion is showing kindness and understanding to yourself and others.";
+    } else if (queryLower.includes("authenticity")) {
+      return "Authenticity means acting from awareness and alignment with your higher consciousness.";
+    } else if (queryLower.includes("journaling")) {
+      return "Journaling is a dialogue with yourself, helping you explore thoughts and feelings.";
+    } else if (queryLower.includes("meditation") || queryLower.includes("breathwork")) {
+      return "Meditation and breathwork ground you in the present moment, fostering clarity.";
+    } else if (queryLower.includes("compassionate reflection")) {
+      return "Compassionate reflection is reviewing your life with gentle understanding.";
+    } else if (queryLower.includes("nature")) {
+      return "Connecting with nature helps you find presence and peace, resonating with the world.";
+    }
+    return "I’m here to help you explore Resonance. Could you ask about a specific topic from the 18 nodes?";
+  };
+
   const alignResponse = (query: string, grokResponse: string) => {
     let alignedReply = grokResponse;
+    const queryLower = query.toLowerCase();
+    const relevantNodes = [];
+
     resonanceNodes.forEach((node) => {
       const nodeTitle = node.split(":")[0].toLowerCase();
-      // Check for exact match or similar match (e.g., typos)
       if (
         grokResponse.toLowerCase().includes(nodeTitle) ||
         calculateSimilarity(grokResponse.toLowerCase(), nodeTitle) > 0.8
       ) {
-        alignedReply = `Based on my insight and your book's wisdom (${node}), ${grokResponse}`;
+        relevantNodes.push(node);
       }
     });
-    if (alignedReply === grokResponse) {
+
+    if (relevantNodes.length > 0) {
+      alignedReply = `Based on my insight and your book's wisdom (${relevantNodes.join(", ")}), ${grokResponse}`;
+    } else if (alignedReply === grokResponse) {
       alignedReply = `This aligns with your journey of Resonance. ${grokResponse} Consider exploring your 18 nodes for deeper insight.`;
     }
     return alignedReply;
   };
 
   const getResponse = () => {
-    const grokReply = "Mindfulness is being aware and present in the moment, often through meditation.";
+    const grokReply = getGrokReply(userQuery);
     const finalReply = alignResponse(userQuery, grokReply);
     setResponse(finalReply);
-    setUserQuery(""); // Clear the input field
+    setUserQuery("");
   };
 
   const askAgain = () => {
     setResponse("");
-    setUserQuery(""); // Reset for a new question
+    setUserQuery("");
   };
 
   return (
