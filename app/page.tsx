@@ -67,7 +67,13 @@ export default function Home() {
       }
     }
 
-    if (isEmotionalQuery && queryLower.includes("stressed")) {
+    const queries = query.split(/[\n…]/).map(q => q.trim()).filter(q => q);
+    const sleepFirst = queries[0].toLowerCase().includes("sleep") || queries[0].toLowerCase().includes("cant sleep");
+    const stressMentioned = queries.some(q => q.toLowerCase().includes("stressed"));
+
+    if (isEmotionalQuery && sleepFirst) {
+      return "I see you’re having trouble sleeping. Based on the book's wisdom, I recommend Meditation and Breathwork to promote relaxation and calmness, which can also help with the stress you mentioned. Additionally, the closest practice for you might be exploring ";
+    } else if (isEmotionalQuery && queryLower.includes("stressed")) {
       return "I see you’re feeling stressed. Based on the book's wisdom, I recommend trying Meditation and Breathwork to ground yourself, with journaling your feelings as a supportive step. Additionally, the closest practice for you might be exploring ";
     } else if (isEmotionalQuery && (queryLower.includes("recommend") || queryLower.includes("suggest"))) {
       return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
