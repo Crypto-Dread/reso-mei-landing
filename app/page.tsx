@@ -73,7 +73,7 @@ export default function Home() {
 
     // Handle sleep queries independently
     if (queryLower.includes("sleep") || queryLower.includes("cant sleep")) {
-      return "I see you’re having trouble sleeping, which may be linked to stress or restlessness. Based on the book's wisdom, I recommend Meditation and Breathwork to promote relaxation and calmness. Additionally, the closest practice for you might be exploring ";
+      return "I see you’re having trouble sleeping, which may be linked to stress or restlessness. Based on our concept of Resonance (Meditation and Breathwork: Cultivating Presence: Grounding in the moment for clarity.), I recommend Meditation and Breathwork to promote relaxation and calmness. For a deeper insight, explore the 18 nodes.";
     } else if (isEmotionalQuery && sleepFirst) {
       return "I see you’re having trouble sleeping. Based on the book's wisdom, I recommend Meditation and Breathwork to promote relaxation and calmness, which can also help with the stress you mentioned. Additionally, the closest practice for you might be exploring ";
     } else if (isEmotionalQuery && queryLower.includes("stressed")) {
@@ -253,6 +253,10 @@ export default function Home() {
     }
     if (alignedReply === grokResponse && !isEmotionalQuery && !nodeMatch) {
       alignedReply = `${grokResponse} Consider exploring the 18 nodes for deeper insight.`;
+    }
+    // Prevent additional alignment for sleep-only queries
+    if (queryLower.includes("sleep") || queryLower.includes("cant sleep")) {
+      alignedReply = grokResponse;
     }
     return alignedReply;
   };
