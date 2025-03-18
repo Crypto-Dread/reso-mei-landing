@@ -1,4 +1,4 @@
-"use client"; // Required for client-side interactivity in Next.js
+"use client";
 
 import { useState } from "react";
 
@@ -27,10 +27,27 @@ export default function Home() {
     "Connect with Nature: Resonating with the World: Finding presence and peace in nature."
   ];
 
+  const calculateSimilarity = (str1: string, str2: string) => {
+    const longer = str1.length > str2.length ? str1 : str2;
+    const shorter = str1.length > str2.length ? str2 : str1;
+    const lengthDiff = longer.length - shorter.length;
+    if (lengthDiff > 2) return 0; // Too different
+    let matches = 0;
+    for (let i = 0; i < shorter.length; i++) {
+      if (longer[i] === shorter[i]) matches++;
+    }
+    return matches / longer.length;
+  };
+
   const alignResponse = (query: string, grokResponse: string) => {
     let alignedReply = grokResponse;
     resonanceNodes.forEach((node) => {
-      if (grokResponse.toLowerCase().includes(node.split(":")[0].toLowerCase())) {
+      const nodeTitle = node.split(":")[0].toLowerCase();
+      // Check for exact match or similar match (e.g., typos)
+      if (
+        grokResponse.toLowerCase().includes(nodeTitle) ||
+        calculateSimilarity(grokResponse.toLowerCase(), nodeTitle) > 0.8
+      ) {
         alignedReply = `Based on my insight and your book's wisdom (${node}), ${grokResponse}`;
       }
     });
@@ -41,10 +58,15 @@ export default function Home() {
   };
 
   const getResponse = () => {
-    // For now, manually input Grok's response (we'll automate later)
     const grokReply = "Mindfulness is being aware and present in the moment, often through meditation.";
     const finalReply = alignResponse(userQuery, grokReply);
     setResponse(finalReply);
+    setUserQuery(""); // Clear the input field
+  };
+
+  const askAgain = () => {
+    setResponse("");
+    setUserQuery(""); // Reset for a new question
   };
 
   return (
@@ -65,7 +87,15 @@ export default function Home() {
           Submit
         </button>
         {response && (
-          <p className="mt-4 text-gray-700">{response}</p>
+          <div className="mt-4">
+            <p className="text-gray-700">{response}</p>
+            <button
+              onClick={askAgain}
+              className="mt-2 text-blue-600 font-medium underline hover:text-blue-800"
+            >
+              What else would you like to know?
+            </button>
+          </div>
         )}
       </div>
     </div>
