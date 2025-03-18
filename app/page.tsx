@@ -64,6 +64,8 @@ export default function Home() {
       return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
     } else if (isEmotionalQuery) { // Standalone emotional statements
       return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
+    } else if (queryLower.includes("journey") && (queryLower.includes("my unique") || queryLower.includes("acceptance"))) {
+      return "Accepting your unique journey means honoring your path without comparing to others, as outlined in our Resonance framework. This node encourages self-acceptance and recognizing your individual growth. Consider exploring ";
     } else if (queryLower.includes("resonance")) {
       return "Resonance is the feeling of alignment between your inner and outer self, creating harmony in your life.";
     } else if (queryLower.includes("awareness")) {
@@ -78,14 +80,12 @@ export default function Home() {
       return "Mindfulness is being aware and present in the moment, often through meditation.";
     } else if (queryLower.includes("self-reflection") || queryLower.includes("shadow work")) {
       return "Self-reflection and shadow work involve examining and integrating your hidden fears and strengths.";
-    } else if (queryLower.includes("acceptance") && queryLower.includes("journey")) {
-      return "Accepting your unique journey means honoring your path without comparing to others.";
+    } else if (queryLower.includes("acceptance") && !queryLower.includes("journey")) {
+      return "Acceptance is meeting life as it is, with openness and courage.";
     } else if (queryLower.includes("resonance") && queryLower.includes("achievement")) {
       return "Prioritizing Resonance over achievement focuses on inner alignment rather than external success.";
     } else if (queryLower.includes("presence")) {
       return "Presence is fully inhabiting the moment with intention and awareness.";
-    } else if (queryLower.includes("acceptance")) {
-      return "Acceptance is meeting life as it is, with openness and courage.";
     } else if (queryLower.includes("curiosity")) {
       return "Curiosity drives exploration and discovery, opening new perspectives.";
     } else if (queryLower.includes("compassion")) {
@@ -175,6 +175,13 @@ export default function Home() {
         localStorage.setItem("learningData", JSON.stringify(newData));
         return newData;
       });
+    } else if (!isEmotionalQuery && (queryLower.includes("journey") || queryLower.includes("acceptance"))) {
+      const relevantNodes = resonanceNodes.filter(node =>
+        node.toLowerCase().includes("journey") || node.toLowerCase().includes("acceptance")
+      );
+      if (relevantNodes.length > 0) {
+        alignedReply = `Based on our concept of Resonance (${relevantNodes.join(", ")}), ${grokResponse}`;
+      }
     } else if (!isEmotionalQuery) {
       const relevantNodes = [];
       resonanceNodes.forEach((node) => {
