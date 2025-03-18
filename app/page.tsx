@@ -71,7 +71,10 @@ export default function Home() {
     const sleepFirst = queries[0].toLowerCase().includes("sleep") || queries[0].toLowerCase().includes("cant sleep");
     const stressMentioned = queries.some(q => q.toLowerCase().includes("stressed"));
 
-    if (isEmotionalQuery && sleepFirst) {
+    // Handle sleep queries independently
+    if (queryLower.includes("sleep") || queryLower.includes("cant sleep")) {
+      return "I see you’re having trouble sleeping, which may be linked to stress or restlessness. Based on the book's wisdom, I recommend Meditation and Breathwork to promote relaxation and calmness. Additionally, the closest practice for you might be exploring ";
+    } else if (isEmotionalQuery && sleepFirst) {
       return "I see you’re having trouble sleeping. Based on the book's wisdom, I recommend Meditation and Breathwork to promote relaxation and calmness, which can also help with the stress you mentioned. Additionally, the closest practice for you might be exploring ";
     } else if (isEmotionalQuery && queryLower.includes("stressed")) {
       return "I see you’re feeling stressed. Based on the book's wisdom, I recommend trying Meditation and Breathwork to ground yourself, with journaling your feelings as a supportive step. Additionally, the closest practice for you might be exploring ";
@@ -79,8 +82,6 @@ export default function Home() {
       return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
     } else if (isEmotionalQuery && queryLower.includes("help")) {
       return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
-    } else if (isEmotionalQuery && (queryLower.includes("sleep") || queryLower.includes("cant sleep"))) {
-      return "I see you’re having trouble sleeping, which may be linked to stress or restlessness. Based on the book's wisdom, I recommend Meditation and Breathwork to promote relaxation and calmness. Additionally, the closest practice for you might be exploring ";
     } else if (isEmotionalQuery) { // Standalone emotional statements
       return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
     } else if (queryLower.includes("journey") && (queryLower.includes("my unique") || queryLower.includes("acceptance"))) {
