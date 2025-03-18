@@ -50,7 +50,7 @@ export default function Home() {
     if (isEmotionalQuery && queryLower.includes("recommend")) {
       return "I sense you might be feeling stressed or worried. Based on the book's wisdom, I recommend trying Meditation and Breathwork to ground yourself.";
     } else if (isEmotionalQuery && queryLower.includes("help")) {
-      return "I notice you’re experiencing strong emotions. Based on the book's wisdom, I suggest trying Self-Reflection and Shadow Work to understand your feelings, and Compassionate Reflection to approach them with kindness.";
+      return "I notice you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. Additionally, the closest practice for you might be exploring ";
     } else if (queryLower.includes("resonance")) {
       return "Resonance is the feeling of alignment between your inner and outer self, creating harmony in your life.";
     } else if (queryLower.includes("awareness")) {
@@ -98,7 +98,22 @@ export default function Home() {
       queryLower.includes(keyword) || calculateSimilarity(queryLower, keyword) > 0.6
     );
 
-    if (!isEmotionalQuery) {
+    if (isEmotionalQuery && queryLower.includes("help") && !queryLower.includes("recommend")) {
+      // Find the closest node among Nodes 15-18
+      const lastFourNodes = resonanceNodes.slice(14); // Nodes 15-18
+      let maxSimilarity = -1;
+      let closestNode = "";
+      lastFourNodes.forEach((node) => {
+        const nodeTitle = node.split(":")[0].toLowerCase();
+        const similarity = calculateSimilarity(queryLower, nodeTitle);
+        if (similarity > maxSimilarity) {
+          maxSimilarity = similarity;
+          closestNode = node;
+        }
+      });
+      alignedReply += closestNode ? `${closestNode.split(":")[0]} for further support.` : "one of the practices for further support.";
+      alignedReply += " Consider exploring the 18 nodes for deeper insight.";
+    } else if (!isEmotionalQuery) {
       const relevantNodes = [];
       resonanceNodes.forEach((node) => {
         const nodeTitle = node.split(":")[0].toLowerCase();
@@ -113,7 +128,7 @@ export default function Home() {
         alignedReply = `Based on our concept of Resonance (${relevantNodes.join(", ")}), ${grokResponse}`;
       }
     }
-    if (alignedReply === grokResponse) {
+    if (alignedReply === grokResponse && !isEmotionalQuery) {
       alignedReply = `${grokResponse} Consider exploring the 18 nodes for deeper insight.`; // Removed "This aligns with your journey of Resonance."
     }
     return alignedReply;
