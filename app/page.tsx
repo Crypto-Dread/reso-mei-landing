@@ -6,6 +6,10 @@ export default function Home() {
   const [userQuery, setUserQuery] = useState("");
   const [response, setResponse] = useState("");
   const [displayedQuery, setDisplayedQuery] = useState(""); // Holds the submitted query
+  const [learningData, setLearningData] = useState(() => {
+    const saved = localStorage.getItem("learningData");
+    return saved ? JSON.parse(saved) : {};
+  });
 
   const resonanceNodes = [
     "Life as a Journey of Resonance: Aligning inner and outer reactions for harmony.",
@@ -47,11 +51,13 @@ export default function Home() {
       queryLower.includes(keyword) || calculateSimilarity(queryLower, keyword) > 0.6
     );
 
-    if (isEmotionalQuery && (queryLower.includes("recommend") || queryLower.includes("suggest"))) {
+    if (isEmotionalQuery && queryLower.includes("stressed")) {
+      return "I see you’re feeling stressed. Based on the book's wisdom, I recommend trying Meditation and Breathwork to ground yourself, with journaling your feelings as a supportive step. Additionally, the closest practice for you might be exploring ";
+    } else if (isEmotionalQuery && (queryLower.includes("recommend") || queryLower.includes("suggest"))) {
       return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
     } else if (isEmotionalQuery && queryLower.includes("help")) {
       return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
-    } else if (isEmotionalQuery) { // New condition for standalone emotional statements
+    } else if (isEmotionalQuery) { // Standalone emotional statements
       return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
     } else if (queryLower.includes("resonance")) {
       return "Resonance is the feeling of alignment between your inner and outer self, creating harmony in your life.";
@@ -68,7 +74,7 @@ export default function Home() {
     } else if (queryLower.includes("self-reflection") || queryLower.includes("shadow work")) {
       return "Self-reflection and shadow work involve examining and integrating your hidden fears and strengths.";
     } else if (queryLower.includes("acceptance") && queryLower.includes("journey")) {
-      return "Accepting your unique journey means honoring your path without comparison.";
+      return "Accepting your unique journey means honoring your path without comparing to others.";
     } else if (queryLower.includes("resonance") && queryLower.includes("achievement")) {
       return "Prioritizing Resonance over achievement focuses on inner alignment rather than external success.";
     } else if (queryLower.includes("presence")) {
@@ -101,35 +107,51 @@ export default function Home() {
     );
 
     if (isEmotionalQuery && (queryLower.includes("suggest") || queryLower.includes("recommend") || queryLower.includes("help"))) {
-      // Split query into multiple parts if separated by "..." or newline
       const queries = query.split(/[\n…]/).map(q => q.trim()).filter(q => q);
       let combinedReply = alignedReply;
       queries.forEach((q) => {
         const qLower = q.toLowerCase();
-        const lastFourNodes = resonanceNodes.slice(14); // Nodes 15-18
+        const lastFourNodes = resonanceNodes.slice(14);
         let maxSimilarity = -1;
         let closestNode = "";
         lastFourNodes.forEach((node) => {
           const nodeTitle = node.split(":")[0].toLowerCase();
-          const similarity = calculateSimilarity(qLower, nodeTitle);
+          let similarity = calculateSimilarity(qLower, nodeTitle);
+          if (learningData[qLower]?.[nodeTitle]) {
+            similarity += learningData[qLower][nodeTitle] * 0.1; // Boost by learned frequency
+          }
           if (similarity > maxSimilarity) {
             maxSimilarity = similarity;
             closestNode = node;
           }
         });
-        if (combinedReply === grokResponse) { // Only append for the first query
+        if (combinedReply === grokResponse) {
           combinedReply += closestNode ? `${closestNode.split(":")[0]} for further support.` : "one of the practices for further support.";
           combinedReply += " and deeper insight.";
+          setLearningData((prev) => {
+            const newData = {
+              ...prev,
+              [qLower]: {
+                ...prev[qLower],
+                [closestNode.split(":")[0].toLowerCase()]: (prev[qLower]?.[closestNode.split(":")[0].toLowerCase()] || 0) + 1,
+              },
+            };
+            localStorage.setItem("learningData", JSON.stringify(newData));
+            return newData;
+          });
         }
       });
       alignedReply = combinedReply;
-    } else if (isEmotionalQuery) { // Handle standalone emotional statements
-      const lastFourNodes = resonanceNodes.slice(14); // Nodes 15-18
+    } else if (isEmotionalQuery) {
+      const lastFourNodes = resonanceNodes.slice(14);
       let maxSimilarity = -1;
       let closestNode = "";
       lastFourNodes.forEach((node) => {
         const nodeTitle = node.split(":")[0].toLowerCase();
-        const similarity = calculateSimilarity(queryLower, nodeTitle);
+        let similarity = calculateSimilarity(queryLower, nodeTitle);
+        if (learningData[queryLower]?.[nodeTitle]) {
+          similarity += learningData[queryLower][nodeTitle] * 0.1;
+        }
         if (similarity > maxSimilarity) {
           maxSimilarity = similarity;
           closestNode = node;
@@ -137,6 +159,17 @@ export default function Home() {
       });
       alignedReply += closestNode ? `${closestNode.split(":")[0]} for further support.` : "one of the practices for further support.";
       alignedReply += " and deeper insight.";
+      setLearningData((prev) => {
+        const newData = {
+          ...prev,
+          [queryLower]: {
+            ...prev[queryLower],
+            [closestNode.split(":")[0].toLowerCase()]: (prev[queryLower]?.[closestNode.split(":")[0].toLowerCase()] || 0) + 1,
+          },
+        };
+        localStorage.setItem("learningData", JSON.stringify(newData));
+        return newData;
+      });
     } else if (!isEmotionalQuery) {
       const relevantNodes = [];
       resonanceNodes.forEach((node) => {
@@ -153,7 +186,7 @@ export default function Home() {
       }
     }
     if (alignedReply === grokResponse && !isEmotionalQuery) {
-      alignedReply = `${grokResponse} Consider exploring the 18 nodes for deeper insight.`; // Removed "This aligns with your journey of Resonance."
+      alignedReply = `${grokResponse} Consider exploring the 18 nodes for deeper insight.`;
     }
     return alignedReply;
   };
