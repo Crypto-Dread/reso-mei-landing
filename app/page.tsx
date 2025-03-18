@@ -48,9 +48,9 @@ export default function Home() {
     );
 
     if (isEmotionalQuery && (queryLower.includes("recommend") || queryLower.includes("suggest"))) {
-      return "I notice you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. Additionally, the closest practice for you might be exploring ";
+      return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
     } else if (isEmotionalQuery && queryLower.includes("help")) {
-      return "I notice you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. Additionally, the closest practice for you might be exploring ";
+      return "I see you’re experiencing strong emotions. Based on the book's wisdom, I recommend journaling your feelings as a starting point. and try breathwork Additionally, the closest practice for you might be exploring ";
     } else if (queryLower.includes("resonance")) {
       return "Resonance is the feeling of alignment between your inner and outer self, creating harmony in your life.";
     } else if (queryLower.includes("awareness")) {
@@ -82,7 +82,7 @@ export default function Home() {
     } else if (queryLower.includes("journaling")) {
       return "Journaling is a dialogue with yourself, helping you explore thoughts and feelings.";
     } else if (queryLower.includes("meditation") || queryLower.includes("breathwork")) {
-      return "Meditation and breathwork ground you in the present moment, fostering clarity.";
+      return "Meditation and breathwork ground you in the moment, fostering clarity.";
     } else if (queryLower.includes("compassionate reflection")) {
       return "Compassionate reflection is reviewing your life with gentle understanding.";
     } else if (queryLower.includes("nature")) {
@@ -99,20 +99,28 @@ export default function Home() {
     );
 
     if (isEmotionalQuery && (queryLower.includes("suggest") || queryLower.includes("recommend") || queryLower.includes("help"))) {
-      // Find the closest node among Nodes 15-18
-      const lastFourNodes = resonanceNodes.slice(14); // Nodes 15-18
-      let maxSimilarity = -1;
-      let closestNode = "";
-      lastFourNodes.forEach((node) => {
-        const nodeTitle = node.split(":")[0].toLowerCase();
-        const similarity = calculateSimilarity(queryLower, nodeTitle);
-        if (similarity > maxSimilarity) {
-          maxSimilarity = similarity;
-          closestNode = node;
+      // Split query into multiple parts if separated by "..." or newline
+      const queries = query.split(/[\n…]/).map(q => q.trim()).filter(q => q);
+      let combinedReply = alignedReply;
+      queries.forEach((q) => {
+        const qLower = q.toLowerCase();
+        const lastFourNodes = resonanceNodes.slice(14); // Nodes 15-18
+        let maxSimilarity = -1;
+        let closestNode = "";
+        lastFourNodes.forEach((node) => {
+          const nodeTitle = node.split(":")[0].toLowerCase();
+          const similarity = calculateSimilarity(qLower, nodeTitle);
+          if (similarity > maxSimilarity) {
+            maxSimilarity = similarity;
+            closestNode = node;
+          }
+        });
+        if (combinedReply === grokResponse) { // Only append for the first query
+          combinedReply += closestNode ? `${closestNode.split(":")[0]} for further support.` : "one of the practices for further support.";
+          combinedReply += " and deeper insight.";
         }
       });
-      alignedReply += closestNode ? `${closestNode.split(":")[0]} for further support.` : "one of the practices for further support.";
-      alignedReply += " Consider exploring the 18 nodes for deeper insight.";
+      alignedReply = combinedReply;
     } else if (!isEmotionalQuery) {
       const relevantNodes = [];
       resonanceNodes.forEach((node) => {
