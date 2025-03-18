@@ -1,15 +1,20 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [userQuery, setUserQuery] = useState("");
   const [response, setResponse] = useState("");
   const [displayedQuery, setDisplayedQuery] = useState(""); // Holds the submitted query
-  const [learningData, setLearningData] = useState(() => {
+  const [learningData, setLearningData] = useState({}); // Initialize empty on server
+
+  useEffect(() => {
+    // Load learning data from localStorage only on client-side
     const saved = localStorage.getItem("learningData");
-    return saved ? JSON.parse(saved) : {};
-  });
+    if (saved) {
+      setLearningData(JSON.parse(saved));
+    }
+  }, []); // Empty dependency array ensures it runs once on mount
 
   const resonanceNodes = [
     "Life as a Journey of Resonance: Aligning inner and outer reactions for harmony.",
@@ -92,7 +97,7 @@ export default function Home() {
     } else if (queryLower.includes("meditation") || queryLower.includes("breathwork")) {
       return "Meditation and breathwork ground you in the moment, fostering clarity.";
     } else if (queryLower.includes("compassionate reflection")) {
-      return "Compassionate reflection is reviewing your life with gentle understanding.";
+      return "Compassionate reflection is reviewing your life with gentle kindness.";
     } else if (queryLower.includes("nature")) {
       return "Connecting with nature helps you find presence and peace, resonating with the world.";
     }
